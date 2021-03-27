@@ -15,23 +15,23 @@ user = 1
 con = sql.connect('test3.db', check_same_thread=False)
 with con:
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `USER` (`USERID` INTEGER PRIMARY KEY, `CurP` VARCHAR(5))")
+    cur.execute("CREATE TABLE IF NOT EXISTS `USER` (`USERID` INTEGER, `CurP` INTEGER)")
     con.commit()
 
 with con:
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `PATH` (`POINTID` PRIMERY KEY AUTO INCREMENT,'USERID' INT, `POINT` VARCHAR(5))")
+    cur.execute("CREATE TABLE IF NOT EXISTS `PATH` (`POINTID` PRIMERY KEY AUTO INCREMENT,'USERID' INTEGER, `POINT` VARCHAR(5))")
     con.commit()
 def insert(x):
     path = list(nx.dfs_edges(G,source =x))
     i = 0
     with con:
-           cur.execute(f"INSERT INTO `PATH` VALUES ('{i}','user1','{path[0][0]}')")
+           cur.execute(f"INSERT INTO `PATH` VALUES ('{i}','1','{path[0][0]}')")
            con.commit()
            i = i+1
     for point in path:
         with con:
-            cur.execute(f"INSERT INTO `PATH` VALUES ('{i}','user1','{point[1]}')")
+            cur.execute(f"INSERT INTO `PATH` VALUES ('{i}',1    ,'{point[1]}')")
             con.commit()
         i= i+1
 
@@ -53,12 +53,13 @@ def second(request):
     with con:    
         cur = con.cursor()    
         cur.execute("SELECT POINT FROM PATH INNER JOIN USER ON USER.USERID = PATH.USERID WHERE CurP = POINTID")
-        CurPointID = cur.fetchall()
+        CurPointID = cur.fetchone()[0]
         print(CurPointID)
-        cur.execute("SELECT CurP from USER")
-        CRPOINT = cur.fetchall()
-        print(CRPOINT)
-        CRPOINT =CRPOINT+1
-        cur.execute(f"UPDATE USER SET CurP = {CRPOINT} WHERE USERID = '{user}'")
-        CRPOINT =CRPOINT-1
-    return render(request, "index.html")
+        cur.execute("SELECT CurP FROM PATH INNER JOIN USER ON USER.USERID = PATH.USERID WHERE CurP = POINTID")
+        change = cur.fetchone()[0]
+        change = change + 1
+        sqli = '''UPDATE USER SET CurP = {0}'''.format(change)
+        cur.execute(sqli)
+        
+    data = {"header": CurPointID}
+    return render(request, "answer.html",context = data)
