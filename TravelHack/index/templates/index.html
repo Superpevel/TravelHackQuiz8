@@ -1,0 +1,11 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<div class="seconds">10</div>
+
+<form action="/index/" method="post">
+    {% csrf_token %}
+    <label for="your_name">Your name: </label>
+    <input id="name" type="text" name="name">
+    <input type="submit" value="OK">
+    {{name}}
+    <div id="time" name="time" value>1000</div>
+</form>
